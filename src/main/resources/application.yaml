@@ -1,3 +1,16 @@
 spring:
   application:
     name: FlashSale
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/flash_sale_DB
+    username: root
+    password: flash_sale_PW
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true

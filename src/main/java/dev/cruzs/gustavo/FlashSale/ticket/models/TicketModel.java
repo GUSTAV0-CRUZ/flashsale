@@ -21,11 +21,11 @@ import java.util.UUID;
 @Table(name = "tb_ticket")
 public class TicketModel {
   @Id
-  @GeneratedValue(strategy = GenerationType.AUTO)
+  @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
   @Column(name = "qr_code")
-  private QrCode qrCode;
+  private String qrCode;
 
   @Column(name = "cpf_holder")
   private String cpfHolder;
@@ -70,7 +70,8 @@ public class TicketModel {
   public void confirmSale(String qrCode) {
     if (status != TicketStatus.PENDING) throw new IllegalArgumentException("Status must not be PENDING");
 
-    this.qrCode = new QrCode(qrCode);
+    QrCode newQrCode = new QrCode(qrCode);
+    this.qrCode = newQrCode.getValue();
     status = TicketStatus.SOLD;
   }
 

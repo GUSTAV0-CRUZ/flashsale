@@ -2,7 +2,7 @@ package dev.cruzs.gustavo.FlashSale.ticket.valueObjects;
 
 public class QrCode {
   private final String value;
-  
+
   public QrCode(final String value) {
     this.value = checkValue(value);
   }
