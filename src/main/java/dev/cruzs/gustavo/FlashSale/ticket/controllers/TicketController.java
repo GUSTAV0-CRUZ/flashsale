@@ -27,6 +27,6 @@ public class TicketController {
 
   @GetMapping("/{id}")
   public ResponseEntity<TicketModel> findById(@PathVariable UUID id) {
-    return ResponseEntity.ok(ticketService.findByIdOrIllegalArgumentException(id));
+    return ResponseEntity.ok(ticketService.findByIdOrTicketNotFoundException(id));
   }
 }

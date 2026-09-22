@@ -1,5 +1,6 @@
 package dev.cruzs.gustavo.FlashSale.ticket.services;
 
+import dev.cruzs.gustavo.FlashSale.ticket.exceptions.TicketNotFoundException;
 import dev.cruzs.gustavo.FlashSale.ticket.models.TicketModel;
 import dev.cruzs.gustavo.FlashSale.ticket.repositories.TicketJpaRepository;
 import org.springframework.stereotype.Service;
@@ -19,21 +20,21 @@ public class TicketService {
     return this.ticketJpaRepository.findAll();
   }
 
-  public TicketModel findByIdOrIllegalArgumentException(UUID id) {
+  public TicketModel findByIdOrTicketNotFoundException(UUID id) {
     return ticketJpaRepository.findById(id).orElseThrow(
-        () -> new IllegalArgumentException("Ticket not found")
+        TicketNotFoundException::new
     );
   }
 
   public TicketModel sell(UUID id, String cpfHolder) {
-    var ticketModel = findByIdOrIllegalArgumentException(id);
+    var ticketModel = findByIdOrTicketNotFoundException(id);
     ticketModel.sell(cpfHolder);
 
     return ticketJpaRepository.save(ticketModel);
   }
 
   public TicketModel confirmSale(UUID id) {
-    var ticketModel = findByIdOrIllegalArgumentException(id);
+    var ticketModel = findByIdOrTicketNotFoundException(id);
 
     ticketModel.confirmSale();
 
@@ -41,7 +42,7 @@ public class TicketService {
   }
 
   public TicketModel refund(UUID id) {
-    var ticketModel = findByIdOrIllegalArgumentException(id);
+    var ticketModel = findByIdOrTicketNotFoundException(id);
 
     ticketModel.refund();
 
