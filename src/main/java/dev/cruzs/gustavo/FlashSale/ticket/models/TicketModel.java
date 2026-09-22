@@ -1,7 +1,6 @@
 package dev.cruzs.gustavo.FlashSale.ticket.models;
 
 import dev.cruzs.gustavo.FlashSale.ticket.enums.TicketStatus;
-import dev.cruzs.gustavo.FlashSale.ticket.valueObjects.QrCode;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -23,9 +22,6 @@ public class TicketModel {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
-
-  @Column(name = "qr_code")
-  private String qrCode;
 
   @Column(name = "cpf_holder")
   private String cpfHolder;
@@ -60,18 +56,16 @@ public class TicketModel {
   @Column(name = "updated_at", nullable = false)
   private Instant updatedAt;
 
-  public void sell(String cpfHolder ) {
+  public void sell(String cpfHolder) {
     if (status != TicketStatus.AVAILABLE) throw new IllegalArgumentException("Status must not be AVAILABLE");
 
     this.cpfHolder = cpfHolder;
     status = TicketStatus.PENDING;
   }
 
-  public void confirmSale(String qrCode) {
+  public void confirmSale() {
     if (status != TicketStatus.PENDING) throw new IllegalArgumentException("Status must not be PENDING");
 
-    QrCode newQrCode = new QrCode(qrCode);
-    this.qrCode = newQrCode.getValue();
     status = TicketStatus.SOLD;
   }
 
@@ -93,7 +87,6 @@ public class TicketModel {
       throw new IllegalArgumentException("Deadline 48 hours expired");
 
     cpfHolder = null;
-    qrCode = null;
     status = TicketStatus.AVAILABLE;
   }
 }

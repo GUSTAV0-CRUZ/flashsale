@@ -1,9 +1,7 @@
 package dev.cruzs.gustavo.FlashSale.ticket.services;
 
-import dev.cruzs.gustavo.FlashSale.ticket.dtos.QrCodeDto;
 import dev.cruzs.gustavo.FlashSale.ticket.models.TicketModel;
 import dev.cruzs.gustavo.FlashSale.ticket.repositories.TicketJpaRepository;
-import dev.cruzs.gustavo.FlashSale.ticket.utils.QrCodeGenerator;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -36,19 +34,8 @@ public class TicketService {
 
   public TicketModel confirmSale(UUID id) {
     var ticketModel = findByIdOrIllegalArgumentException(id);
-    QrCodeDto qrCodeDto = new QrCodeDto(
-        ticketModel.getId(),
-        ticketModel.getCpfHolder(),
-        ticketModel.getName(),
-        ticketModel.getDate(),
-        ticketModel.getLocation(),
-        ticketModel.getSector(),
-        ticketModel.getType(),
-        ticketModel.getStatus()
-    );
-    String qrCode = QrCodeGenerator.generate(qrCodeDto);
 
-    ticketModel.confirmSale(qrCode);
+    ticketModel.confirmSale();
 
     return ticketJpaRepository.save(ticketModel);
   }
