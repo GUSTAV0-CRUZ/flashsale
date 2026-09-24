@@ -1,0 +1,80 @@
+package dev.cruzs.gustavo.FlashSale.order.models;
+
+import dev.cruzs.gustavo.FlashSale.order.enums.OrderStatusEnum;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.UpdateTimestamp;
+
+import java.time.Instant;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.UUID;
+
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "tb_order")
+public class OrderModel {
+  @Id
+  private UUID id;
+
+  @Column(name = "ticket_id",  nullable = false)
+  private UUID ticketId;
+
+  @Column(name = "idempotency_key",  nullable = false)
+  private String idempotencyKey;
+
+  @Column(name = "cpf_holder",  nullable = false)
+  private String cpfHolder;
+
+  @Column(name = "ticket_value",  nullable = false)
+  private Integer ticketValue;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false)
+  private OrderStatusEnum status;
+
+  @CreationTimestamp
+  @Column(nullable = false, updatable = false)
+  private Instant createdAt;
+
+  @UpdateTimestamp
+  @Column(nullable = false)
+  private Instant updatedAt;
+
+  public OrderModel create(UUID ticketId, String cpfHolder, Integer ticketValue) {
+    Instant now = Instant.now();
+
+    return new OrderModel(
+        UUID.randomUUID(),
+        ticketId,
+        generateIdempotencyKey(ticketId, cpfHolder, now),
+        cpfHolder,
+        ticketValue,
+        OrderStatusEnum.PENDING,
+        now,
+        now
+    );
+  }
+
+  private String generateIdempotencyKey(UUID ticketId, String cpfHolder, Instant instant) {
+    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy'T'HH:mm'Z'").withZone(ZoneOffset.UTC);
+    String date = formatter.format(instant);
+
+    return ticketId.toString() + "-" + cpfHolder + "-" + date;
+  }
+
+  public void changeStatus(OrderStatusEnum status) {
+    if (status == null) throw new NullPointerException("Status cannot be null.");
+    if (status == OrderStatusEnum.PENDING)
+      throw new IllegalArgumentException("Status is already PENDING.");
+    if (this.status != OrderStatusEnum.PENDING)
+      throw new IllegalArgumentException("Status is already different from PENDING.");
+
+    this.status = status;
+  }
+}

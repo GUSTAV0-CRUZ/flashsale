@@ -1,6 +1,6 @@
 package dev.cruzs.gustavo.FlashSale.ticket.models;
 
-import dev.cruzs.gustavo.FlashSale.ticket.enums.TicketStatus;
+import dev.cruzs.gustavo.FlashSale.ticket.enums.TicketStatusEnum;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -46,7 +46,7 @@ public class TicketModel {
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
-  private TicketStatus status;
+  private TicketStatusEnum status;
 
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
@@ -57,20 +57,20 @@ public class TicketModel {
   private Instant updatedAt;
 
   public void sell(String cpfHolder) {
-    if (status != TicketStatus.AVAILABLE) throw new IllegalArgumentException("Status must not be AVAILABLE");
+    if (status != TicketStatusEnum.AVAILABLE) throw new IllegalArgumentException("Status must not be AVAILABLE.");
 
     this.cpfHolder = cpfHolder;
-    status = TicketStatus.PENDING;
+    status = TicketStatusEnum.PENDING;
   }
 
   public void confirmSale() {
-    if (status != TicketStatus.PENDING) throw new IllegalArgumentException("Status must not be PENDING");
+    if (status != TicketStatusEnum.PENDING) throw new IllegalArgumentException("Status must not be PENDING.");
 
-    status = TicketStatus.SOLD;
+    status = TicketStatusEnum.SOLD;
   }
 
   public void refund() {
-    if (status != TicketStatus.SOLD) throw new IllegalArgumentException("Status must not be SOLD");
+    if (status != TicketStatusEnum.SOLD) throw new IllegalArgumentException("Status must not be SOLD.");
 
     Instant now = Instant.now();
 
@@ -78,15 +78,15 @@ public class TicketModel {
       throw new IllegalArgumentException("Event date has already passed, or is today.");
 
     if (now.isAfter(updatedAt.plus(Duration.ofDays(7))))
-      throw new IllegalArgumentException("Deadline 7 day expired");
+      throw new IllegalArgumentException("Deadline 7 day expired.");
 
     if (
         now.isAfter(date.minus(Duration.ofDays(7))) &&
         now.isAfter(updatedAt.plus(Duration.ofHours(48)))
     )
-      throw new IllegalArgumentException("Deadline 48 hours expired");
+      throw new IllegalArgumentException("Deadline 48 hours expired.");
 
     cpfHolder = null;
-    status = TicketStatus.AVAILABLE;
+    status = TicketStatusEnum.AVAILABLE;
   }
 }

@@ -1,12 +1,12 @@
 package dev.cruzs.gustavo.FlashSale.ticket.enums;
 
-public enum TicketStatus {
+public enum TicketStatusEnum {
   AVAILABLE ("AVAILABLE"),
   PENDING ("PENDING"),
   SOLD ("SOLD");
 
   private final String value;
-  TicketStatus(String value) {
+  TicketStatusEnum(String value) {
     this.value = value;
   }
 

@@ -22,6 +22,15 @@ public class ExceptionsHandler {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
   }
 
+  @ExceptionHandler(NullPointerException.class)
+  public ResponseEntity<ExceptionsResponseDto> nullPointerException(
+      NullPointerException e,
+      HttpServletRequest request) {
+    var error = new ExceptionsResponseDto(400, e.getMessage(), Instant.now(), request.getRequestURI());
+
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
   @ExceptionHandler(TicketNotFoundException.class)
   public ResponseEntity<ExceptionsResponseDto> ticketNotFoundException(
       TicketNotFoundException e,
