@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -32,7 +33,7 @@ public class OrderModel {
   private String cpfHolder;
 
   @Column(name = "ticket_value",  nullable = false)
-  private Integer ticketValue;
+  private BigDecimal ticketValue;
 
   @Enumerated(EnumType.STRING)
   @Column(nullable = false)
@@ -46,7 +47,7 @@ public class OrderModel {
   @Column(nullable = false)
   private Instant updatedAt;
 
-  public OrderModel create(UUID ticketId, String cpfHolder, Integer ticketValue) {
+  public static OrderModel create(UUID ticketId, String cpfHolder, BigDecimal ticketValue) {
     Instant now = Instant.now();
 
     return new OrderModel(
@@ -61,7 +62,7 @@ public class OrderModel {
     );
   }
 
-  private String generateIdempotencyKey(UUID ticketId, String cpfHolder, Instant instant) {
+   private static String generateIdempotencyKey(UUID ticketId, String cpfHolder, Instant instant) {
     DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy'T'HH:mm'Z'").withZone(ZoneOffset.UTC);
     String date = formatter.format(instant);
 
