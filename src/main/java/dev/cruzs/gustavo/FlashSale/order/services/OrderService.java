@@ -7,9 +7,11 @@ import dev.cruzs.gustavo.FlashSale.order.models.OrderModel;
 import dev.cruzs.gustavo.FlashSale.order.repositories.OrderJpaRepository;
 import dev.cruzs.gustavo.FlashSale.ticket.models.TicketModel;
 import dev.cruzs.gustavo.FlashSale.ticket.services.TicketService;
+import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
+@Service
 public class OrderService {
   private final OrderJpaRepository orderJpaRepository;
   private final TicketService ticketService;
