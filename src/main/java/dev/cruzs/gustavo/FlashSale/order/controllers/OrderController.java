@@ -4,6 +4,7 @@ import dev.cruzs.gustavo.FlashSale.order.dtos.OrderSellDto;
 import dev.cruzs.gustavo.FlashSale.order.dtos.SellRequestDto;
 import dev.cruzs.gustavo.FlashSale.order.services.OrderService;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -18,9 +19,18 @@ public class OrderController {
   }
 
   @PostMapping("/{id}/buy")
-  public String sell(@NotNull @PathVariable UUID id, @RequestBody SellRequestDto sellRequestDto) {
-    return orderService.sell(
+  public ResponseEntity<String> sell(@NotNull @PathVariable UUID id, @RequestBody SellRequestDto sellRequestDto) {
+    String tokenPayment = orderService.sell(
         new OrderSellDto(id,sellRequestDto.cpfHolder())
     );
+
+    return ResponseEntity.ok(tokenPayment);
+  }
+
+  @PatchMapping("/{orderId}/refund")
+  public ResponseEntity<Void> refund(@NotNull @PathVariable UUID orderId) {
+    orderService.refund(orderId);
+
+    return ResponseEntity.noContent().build();
   }
 }

@@ -1,6 +1,7 @@
 package dev.cruzs.gustavo.FlashSale.exceptions;
 
 import dev.cruzs.gustavo.FlashSale.exceptions.dtos.ExceptionsResponseDto;
+import dev.cruzs.gustavo.FlashSale.order.exceptions.OrderNotFoundException;
 import dev.cruzs.gustavo.FlashSale.ticket.exceptions.TicketNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.slf4j.Logger;
@@ -45,6 +46,17 @@ public class ExceptionsHandler {
   @ExceptionHandler(TicketNotFoundException.class)
   public ResponseEntity<ExceptionsResponseDto> ticketNotFoundException(
       TicketNotFoundException e,
+      HttpServletRequest request
+  ) {
+    var error = new ExceptionsResponseDto(404, e.getMessage(), Instant.now(), request.getRequestURI());
+
+    loggerError(error);
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+  }
+
+  @ExceptionHandler(OrderNotFoundException.class)
+  public ResponseEntity<ExceptionsResponseDto> orderNotFoundException(
+      OrderNotFoundException e,
       HttpServletRequest request
   ) {
     var error = new ExceptionsResponseDto(404, e.getMessage(), Instant.now(), request.getRequestURI());

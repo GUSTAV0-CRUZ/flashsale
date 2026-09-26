@@ -54,6 +54,8 @@ public class OrderService {
   public void refund(UUID id) {
     OrderModel orderModel = findByIdOrOrderNotFoundException(id);
 
+    ticketService.refund(orderModel.getTicketId());
+
     orderModel.changeStatus(OrderStatusEnum.REFUND);
     orderJpaRepository.save(orderModel);
 

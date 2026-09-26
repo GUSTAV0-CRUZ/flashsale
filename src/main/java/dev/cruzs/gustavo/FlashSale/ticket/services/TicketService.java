@@ -26,11 +26,11 @@ public class TicketService {
     );
   }
 
-  public TicketModel sell(UUID id, String cpfHolder) {
+  public void sell(UUID id, String cpfHolder) {
     var ticketModel = findByIdOrTicketNotFoundException(id);
     ticketModel.sell(cpfHolder);
 
-    return ticketJpaRepository.save(ticketModel);
+    ticketJpaRepository.save(ticketModel);
   }
 
   public TicketModel confirmSale(UUID id) {
@@ -41,12 +41,11 @@ public class TicketService {
     return ticketJpaRepository.save(ticketModel);
   }
 
-  public TicketModel refund(UUID id) {
+  public void refund(UUID id) {
     var ticketModel = findByIdOrTicketNotFoundException(id);
 
     ticketModel.refund();
 
-    return ticketJpaRepository.save(ticketModel);
+    ticketJpaRepository.save(ticketModel);
   }
-
 }
