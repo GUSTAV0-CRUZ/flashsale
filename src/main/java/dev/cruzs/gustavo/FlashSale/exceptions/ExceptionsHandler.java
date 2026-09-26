@@ -4,6 +4,7 @@ import dev.cruzs.gustavo.FlashSale.exceptions.dtos.ExceptionsResponseDto;
 import dev.cruzs.gustavo.FlashSale.order.exceptions.OrderNotFoundException;
 import dev.cruzs.gustavo.FlashSale.ticket.exceptions.TicketNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class ExceptionsHandler {
@@ -63,5 +66,25 @@ public class ExceptionsHandler {
 
     loggerError(error);
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<ExceptionsResponseDto> constraintViolationException(
+      ConstraintViolationException e,
+      HttpServletRequest request
+  ) {
+    Map<String, String> errorsMessages = new HashMap<>();
+    e.getConstraintViolations().forEach((constraintViolation) -> {
+      String propertyPath = constraintViolation.getPropertyPath().toString();
+      String fieldName = propertyPath.substring(propertyPath.lastIndexOf('.') + 1);
+      String errorMessage = constraintViolation.getMessage();
+
+      errorsMessages.put(fieldName, errorMessage);
+    });
+
+    var error = new ExceptionsResponseDto(400, errorsMessages.toString(), Instant.now(), request.getRequestURI());
+
+    loggerError(error);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
   }
 }

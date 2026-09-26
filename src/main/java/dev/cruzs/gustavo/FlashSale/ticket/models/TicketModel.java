@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.validator.constraints.br.CPF;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -23,6 +24,7 @@ public class TicketModel {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @CPF(message = "CPF invalid")
   @Column(name = "cpf_holder")
   private String cpfHolder;
 
