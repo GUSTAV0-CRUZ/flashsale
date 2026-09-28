@@ -1,7 +1,10 @@
 package dev.cruzs.gustavo.FlashSale.exceptions;
 
+import com.mercadopago.exceptions.MPApiException;
+import com.mercadopago.exceptions.MPException;
 import dev.cruzs.gustavo.FlashSale.exceptions.dtos.ExceptionsResponseDto;
 import dev.cruzs.gustavo.FlashSale.order.exceptions.OrderNotFoundException;
+import dev.cruzs.gustavo.FlashSale.payment.exceptions.MercadoPagoException;
 import dev.cruzs.gustavo.FlashSale.ticket.exceptions.TicketNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -86,5 +89,16 @@ public class ExceptionsHandler {
 
     loggerError(error);
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
+  @ExceptionHandler(MercadoPagoException.class)
+  public ResponseEntity<ExceptionsResponseDto> mercadoPagoException(
+      MercadoPagoException e,
+      HttpServletRequest request
+  ) {
+    var error = new ExceptionsResponseDto(404, e.getMessage(), Instant.now(), request.getRequestURI());
+
+    loggerError(error);
+    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
   }
 }
