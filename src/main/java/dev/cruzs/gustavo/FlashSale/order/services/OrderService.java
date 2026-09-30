@@ -9,6 +9,7 @@ import dev.cruzs.gustavo.FlashSale.payment.dtos.ProcessPaymentDto;
 import dev.cruzs.gustavo.FlashSale.payment.services.PaymentService;
 import dev.cruzs.gustavo.FlashSale.ticket.models.TicketModel;
 import dev.cruzs.gustavo.FlashSale.ticket.services.TicketService;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -35,6 +36,7 @@ public class OrderService {
     );
   }
 
+  @Transactional
   public void sell(OrderSellDto orderSellDto) {
     TicketModel ticketModel = ticketService.findByIdOrTicketNotFoundException(orderSellDto.ticketId());
     ticketService.sell(orderSellDto.ticketId(), orderSellDto.cpfHolder());

@@ -26,6 +26,8 @@ public class PaymentService {
             processPaymentDto.email()
           )
       );
+
+      return;
     }
 
     paymentGateway.processCreditCard(
