@@ -20,11 +20,19 @@ public class OrderController {
 
   @PostMapping("/{id}/buy")
   public ResponseEntity<String> sell(@NotNull @PathVariable UUID id, @RequestBody SellRequestDto sellRequestDto) {
-    String tokenPayment = orderService.sell(
-        new OrderSellDto(id,sellRequestDto.cpfHolder())
+    orderService.sell(
+        new OrderSellDto(
+            id,
+            sellRequestDto.cpfHolder(),
+            sellRequestDto.paymentType(),
+            sellRequestDto.email(),
+            sellRequestDto.token(),
+            sellRequestDto.paymentMethodId(),
+            sellRequestDto.installment()
+        )
     );
 
-    return ResponseEntity.ok(tokenPayment);
+    return ResponseEntity.accepted().build();
   }
 
   @PatchMapping("/{orderId}/refund")

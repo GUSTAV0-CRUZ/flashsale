@@ -96,9 +96,9 @@ public class ExceptionsHandler {
       MercadoPagoException e,
       HttpServletRequest request
   ) {
-    var error = new ExceptionsResponseDto(404, e.getMessage(), Instant.now(), request.getRequestURI());
+    var error = new ExceptionsResponseDto(400, e.getMessage(), Instant.now(), request.getRequestURI());
 
     loggerError(error);
-    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
   }
 }

@@ -46,10 +46,10 @@ public class MercadoPagoAdapter implements PaymentGateway {
         .build();
 
     Map<String, String> headers =  new HashMap<>();
-    headers.put("Authorization", accessToken);
     headers.put("X-Idempotency-Key", IdempotencyKey);
 
     MPRequestOptions requestOptions = MPRequestOptions.builder()
+        .accessToken(accessToken)
         .customHeaders(headers)
         .build();
 

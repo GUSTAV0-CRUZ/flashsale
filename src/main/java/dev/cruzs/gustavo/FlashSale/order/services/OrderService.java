@@ -5,6 +5,8 @@ import dev.cruzs.gustavo.FlashSale.order.enums.OrderStatusEnum;
 import dev.cruzs.gustavo.FlashSale.order.exceptions.OrderNotFoundException;
 import dev.cruzs.gustavo.FlashSale.order.models.OrderModel;
 import dev.cruzs.gustavo.FlashSale.order.repositories.OrderJpaRepository;
+import dev.cruzs.gustavo.FlashSale.payment.dtos.ProcessPaymentDto;
+import dev.cruzs.gustavo.FlashSale.payment.services.PaymentService;
 import dev.cruzs.gustavo.FlashSale.ticket.models.TicketModel;
 import dev.cruzs.gustavo.FlashSale.ticket.services.TicketService;
 import org.springframework.stereotype.Service;
@@ -15,10 +17,16 @@ import java.util.UUID;
 public class OrderService {
   private final OrderJpaRepository orderJpaRepository;
   private final TicketService ticketService;
+  private final PaymentService paymentService;
 
-  public OrderService(OrderJpaRepository orderJpaRepository, TicketService ticketService) {
+  public OrderService(
+      OrderJpaRepository orderJpaRepository,
+      TicketService ticketService,
+      PaymentService paymentService
+  ) {
     this.orderJpaRepository = orderJpaRepository;
     this.ticketService = ticketService;
+    this.paymentService = paymentService;
   }
 
   public OrderModel findByIdOrOrderNotFoundException(UUID id) {
@@ -27,7 +35,7 @@ public class OrderService {
     );
   }
 
-  public String sell(OrderSellDto orderSellDto) {
+  public void sell(OrderSellDto orderSellDto) {
     TicketModel ticketModel = ticketService.findByIdOrTicketNotFoundException(orderSellDto.ticketId());
     ticketService.sell(orderSellDto.ticketId(), orderSellDto.cpfHolder());
 
@@ -36,10 +44,21 @@ public class OrderService {
         orderSellDto.cpfHolder(),
         ticketModel.getPrice()
     );
-    orderJpaRepository.save(orderModel);
 
-//    Add call to the payment system
-    return "Return of payment system";
+    paymentService.processPayment(
+        new ProcessPaymentDto(
+            orderSellDto.paymentType(),
+            orderModel.getId().toString(),
+            orderModel.getTicketValue(),
+            orderModel.getIdempotencyKey(),
+            orderSellDto.email(),
+            orderSellDto.token(),
+            orderSellDto.paymentMethodId(),
+            orderSellDto.installments()
+        )
+    );
+
+    orderJpaRepository.save(orderModel);
   }
 
   public void confirmSale(UUID id) {
