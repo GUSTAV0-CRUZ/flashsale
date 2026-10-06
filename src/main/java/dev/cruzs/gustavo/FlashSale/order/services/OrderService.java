@@ -80,6 +80,7 @@ public class OrderService {
     orderModel.changeStatus(OrderStatusEnum.REFUND);
     orderJpaRepository.save(orderModel);
 
+//    Add call to the payment system
 //    Add call to the notification system
   }
 }
