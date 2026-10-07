@@ -63,10 +63,12 @@ public class OrderService {
     orderJpaRepository.save(orderModel);
   }
 
+  @Transactional
   public void confirmSale(UUID id) {
     OrderModel orderModel = findByIdOrOrderNotFoundException(id);
 
     orderModel.changeStatus(OrderStatusEnum.CONFIRMED);
+    ticketService.confirmSale(orderModel.getTicketId());
     orderJpaRepository.save(orderModel);
 
 //    Add call to the notification system

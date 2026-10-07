@@ -1,6 +1,5 @@
 package dev.cruzs.gustavo.FlashSale.order.services;
 
-import dev.cruzs.gustavo.FlashSale.ticket.services.TicketService;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
@@ -8,25 +7,25 @@ import java.util.UUID;
 
 @Service
 public class OrderWebHookService {
-  private final TicketService ticketService;
+  private final OrderService orderService;
 
-  public OrderWebHookService(TicketService ticketService) {
-    this.ticketService = ticketService;
+  public OrderWebHookService(OrderService orderService) {
+    this.orderService = orderService;
   }
 
   public void orderPayment(Map<String, Object> mercadoPagoOrderResponseDto) {
     Map<String, Object> data = (Map<String, Object>) mercadoPagoOrderResponseDto.get("data");
-    UUID idOrder = (UUID) data.get("external_reference");
+    UUID idOrder = UUID.fromString((String) data.get("external_reference"));
     String action = (String) mercadoPagoOrderResponseDto.get("action");
 
     if (action.equals("order.failed")) {
-      ticketService.refund(idOrder);
+      orderService.refund(idOrder);
       //  Add call to the notification system
 
       return;
     }
 
-    ticketService.confirmSale(idOrder);
+    orderService.confirmSale(idOrder);
     //  Add call to the notification system
   }
 }
