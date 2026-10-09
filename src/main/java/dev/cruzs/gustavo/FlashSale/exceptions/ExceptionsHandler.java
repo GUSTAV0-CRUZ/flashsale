@@ -1,7 +1,5 @@
 package dev.cruzs.gustavo.FlashSale.exceptions;
 
-import com.mercadopago.exceptions.MPApiException;
-import com.mercadopago.exceptions.MPException;
 import dev.cruzs.gustavo.FlashSale.exceptions.dtos.ExceptionsResponseDto;
 import dev.cruzs.gustavo.FlashSale.order.exceptions.OrderNotFoundException;
 import dev.cruzs.gustavo.FlashSale.payment.exceptions.MercadoPagoException;

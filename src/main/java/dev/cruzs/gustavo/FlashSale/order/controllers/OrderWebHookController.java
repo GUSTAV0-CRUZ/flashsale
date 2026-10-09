@@ -1,6 +1,7 @@
 package dev.cruzs.gustavo.FlashSale.order.controllers;
 
 import dev.cruzs.gustavo.FlashSale.order.services.OrderWebHookService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +19,8 @@ public class OrderWebHookController {
   }
 
   @PostMapping(value = "/payment")
-  public void orderPayment(@RequestBody Map<String, Object> mercadoPagoOrderResponseDto) {
+  public ResponseEntity<Void> orderPayment(@RequestBody Map<String, Object> mercadoPagoOrderResponseDto) {
     orderWebHookService.orderPayment(mercadoPagoOrderResponseDto);
+    return ResponseEntity.ok().build();
   }
 }
