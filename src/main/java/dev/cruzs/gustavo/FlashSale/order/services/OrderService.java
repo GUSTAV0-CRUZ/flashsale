@@ -11,12 +11,15 @@ import dev.cruzs.gustavo.FlashSale.payment.services.PaymentService;
 import dev.cruzs.gustavo.FlashSale.ticket.models.TicketModel;
 import dev.cruzs.gustavo.FlashSale.ticket.services.TicketService;
 import jakarta.transaction.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
 
 @Service
 public class OrderService {
+  private final Logger logger = LoggerFactory.getLogger(OrderService.class);
   private final OrderJpaRepository orderJpaRepository;
   private final TicketService ticketService;
   private final PaymentService paymentService;
@@ -62,6 +65,8 @@ public class OrderService {
     );
 
     orderJpaRepository.save(orderModel);
+
+    logger.info("Order with id: {} is pending", orderModel.getId());
     return qrCodeDto;
   }
 
@@ -74,16 +79,23 @@ public class OrderService {
     orderJpaRepository.save(orderModel);
 
 //    Add call to the notification system
+    logger.info("Order with id: {} is confirmed", id);
   }
 
   public void cancelled(UUID id) {
     OrderModel orderModel = findByIdOrOrderNotFoundException(id);
 
-    ticketService.refund(orderModel.getTicketId());
+    ticketService.cancelSale(orderModel.getTicketId());
     orderModel.changeStatus(OrderStatusEnum.CANCELLED);
     orderJpaRepository.save(orderModel);
 
 //    Add call to the notification system
+    logger.info("Order with id: {} is cancelled", id);
+  }
+
+  public void actionRequired(UUID id) {
+//    Add call to the notification system
+    logger.info("Order with id: {} is required action", id);
   }
 
   public void refund(UUID id) {
@@ -95,5 +107,6 @@ public class OrderService {
 
 //    Add call to the payment system
 //    Add call to the notification system
+    logger.info("Order with id: {} is refund", id);
   }
 }

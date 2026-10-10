@@ -56,7 +56,7 @@ public class MercadoPagoAdapter implements PaymentGateway {
 
     try {
       Order order = client.create(request, requestOptions);
-      logger.info("Order created: {}", order.getId());
+      logger.info("Order of Mercado Pago created with id: {}", order.getId());
       return order;
     } catch (MPException | MPApiException e) {
       throw new MercadoPagoException(e.getMessage(), e);

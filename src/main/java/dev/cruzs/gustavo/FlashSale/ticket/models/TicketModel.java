@@ -71,6 +71,13 @@ public class TicketModel {
     status = TicketStatusEnum.SOLD;
   }
 
+  public void cancelSale() {
+    if (status != TicketStatusEnum.PENDING) throw new IllegalArgumentException("Status must not be PENDING.");
+
+    cpfHolder = null;
+    status = TicketStatusEnum.AVAILABLE;
+  }
+
   public void refund() {
     if (status != TicketStatusEnum.SOLD) throw new IllegalArgumentException("Status must not be SOLD.");
 

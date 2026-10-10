@@ -41,6 +41,14 @@ public class TicketService {
     return ticketJpaRepository.save(ticketModel);
   }
 
+  public TicketModel cancelSale(UUID id) {
+    var ticketModel = findByIdOrTicketNotFoundException(id);
+
+    ticketModel.cancelSale();
+
+    return ticketJpaRepository.save(ticketModel);
+  }
+
   public void refund(UUID id) {
     var ticketModel = findByIdOrTicketNotFoundException(id);
 
