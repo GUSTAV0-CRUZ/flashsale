@@ -3,7 +3,8 @@ package dev.cruzs.gustavo.FlashSale.order.enums;
 public enum OrderStatusEnum {
   PENDING ("PENDING"),
   CONFIRMED("CONFIRMED"),
-  REFUND("REFUND");
+  REFUND("REFUND"),
+  CANCELLED("CANCELLED");
 
   private final String value;
 

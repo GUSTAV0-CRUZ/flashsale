@@ -4,9 +4,10 @@ import com.mercadopago.client.order.*;
 import com.mercadopago.core.MPRequestOptions;
 import com.mercadopago.exceptions.MPApiException;
 import com.mercadopago.exceptions.MPException;
-import com.mercadopago.resources.order.Order;
+import com.mercadopago.resources.order.*;
 import dev.cruzs.gustavo.FlashSale.payment.commands.PaymentProcessCreditCartCommand;
 import dev.cruzs.gustavo.FlashSale.payment.commands.PaymentProcessPixCommand;
+import dev.cruzs.gustavo.FlashSale.payment.dtos.QrCodeDto;
 import dev.cruzs.gustavo.FlashSale.payment.exceptions.MercadoPagoException;
 import dev.cruzs.gustavo.FlashSale.payment.gateways.PaymentGateway;
 import org.slf4j.Logger;
@@ -23,7 +24,7 @@ public class MercadoPagoAdapter implements PaymentGateway {
   @Value("${payment.mercado_pago.access_token}")
   private String accessToken;
 
-  private void requestPayment(
+  private Order requestPayment(
       OrderPaymentRequest payment,
       String amount,
       String externalReference,
@@ -56,6 +57,7 @@ public class MercadoPagoAdapter implements PaymentGateway {
     try {
       Order order = client.create(request, requestOptions);
       logger.info("Order created: {}", order.getId());
+      return order;
     } catch (MPException | MPApiException e) {
       throw new MercadoPagoException(e.getMessage(), e);
     }
@@ -83,7 +85,7 @@ public class MercadoPagoAdapter implements PaymentGateway {
   }
 
   @Override
-  public void processPix(PaymentProcessPixCommand command) {
+  public QrCodeDto processPix(PaymentProcessPixCommand command) {
     OrderPaymentRequest payment = OrderPaymentRequest.builder()
         .amount(command.amount().toPlainString())
         .paymentMethod(OrderPaymentMethodRequest.builder()
@@ -93,12 +95,22 @@ public class MercadoPagoAdapter implements PaymentGateway {
         .expirationTime("PT15M")
         .build();
 
-    requestPayment(
+    Order order = requestPayment(
         payment,
         command.amount().toPlainString(),
         command.externalReference(),
         command.idempotencyKey(),
         command.email()
+    );
+
+    OrderTransaction orderTransaction = order.getTransactions();
+    List<OrderPayment> orderPayments = orderTransaction.getPayments();
+    OrderPayment fistOrderPayment = orderPayments.getFirst();
+    OrderPaymentMethod orderPaymentMethod = fistOrderPayment.getPaymentMethod();
+
+    return new QrCodeDto(
+        orderPaymentMethod.getQrCode(),
+        orderPaymentMethod.getQrCodeBase64()
     );
   }
 }

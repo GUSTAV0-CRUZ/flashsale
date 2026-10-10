@@ -3,6 +3,7 @@ package dev.cruzs.gustavo.FlashSale.payment.services;
 import dev.cruzs.gustavo.FlashSale.payment.commands.PaymentProcessCreditCartCommand;
 import dev.cruzs.gustavo.FlashSale.payment.commands.PaymentProcessPixCommand;
 import dev.cruzs.gustavo.FlashSale.payment.dtos.ProcessPaymentDto;
+import dev.cruzs.gustavo.FlashSale.payment.dtos.QrCodeDto;
 import dev.cruzs.gustavo.FlashSale.payment.enums.PaymentTypeEnum;
 import dev.cruzs.gustavo.FlashSale.payment.gateways.PaymentGateway;
 import org.springframework.stereotype.Service;
@@ -15,10 +16,10 @@ public class PaymentService {
     this.paymentGateway = paymentGateway;
   }
 
-  public void processPayment(ProcessPaymentDto processPaymentDto) {
+  public QrCodeDto processPayment(ProcessPaymentDto processPaymentDto) {
     if (processPaymentDto.paymentType() == null) throw new IllegalArgumentException("PaymentType cannot be null");
     if (processPaymentDto.paymentType() == PaymentTypeEnum.PIX) {
-      paymentGateway.processPix(
+      return paymentGateway.processPix(
           new PaymentProcessPixCommand(
             processPaymentDto.externalReference(),
             processPaymentDto.amount(),
@@ -26,8 +27,6 @@ public class PaymentService {
             processPaymentDto.email()
           )
       );
-
-      return;
     }
 
     paymentGateway.processCreditCard(
@@ -41,5 +40,7 @@ public class PaymentService {
           processPaymentDto.installments()
         )
     );
+
+    return null;
   }
 }

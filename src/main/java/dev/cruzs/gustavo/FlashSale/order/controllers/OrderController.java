@@ -3,10 +3,10 @@ package dev.cruzs.gustavo.FlashSale.order.controllers;
 import dev.cruzs.gustavo.FlashSale.order.dtos.OrderSellDto;
 import dev.cruzs.gustavo.FlashSale.order.dtos.SellRequestDto;
 import dev.cruzs.gustavo.FlashSale.order.services.OrderService;
+import dev.cruzs.gustavo.FlashSale.payment.dtos.QrCodeDto;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.UUID;
 
 @RestController
@@ -19,8 +19,8 @@ public class OrderController {
   }
 
   @PostMapping("/{id}/buy")
-  public ResponseEntity<String> sell(@NotNull @PathVariable UUID id, @RequestBody SellRequestDto sellRequestDto) {
-    orderService.sell(
+  public ResponseEntity<QrCodeDto> sell(@NotNull @PathVariable UUID id, @RequestBody SellRequestDto sellRequestDto) {
+    QrCodeDto qrCodeDto = orderService.sell(
         new OrderSellDto(
             id,
             sellRequestDto.cpfHolder(),
@@ -32,7 +32,7 @@ public class OrderController {
         )
     );
 
-    return ResponseEntity.accepted().build();
+    return ResponseEntity.ok().body(qrCodeDto);
   }
 
   @PatchMapping("/{orderId}/refund")

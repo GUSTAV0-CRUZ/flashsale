@@ -6,6 +6,7 @@ import dev.cruzs.gustavo.FlashSale.order.exceptions.OrderNotFoundException;
 import dev.cruzs.gustavo.FlashSale.order.models.OrderModel;
 import dev.cruzs.gustavo.FlashSale.order.repositories.OrderJpaRepository;
 import dev.cruzs.gustavo.FlashSale.payment.dtos.ProcessPaymentDto;
+import dev.cruzs.gustavo.FlashSale.payment.dtos.QrCodeDto;
 import dev.cruzs.gustavo.FlashSale.payment.services.PaymentService;
 import dev.cruzs.gustavo.FlashSale.ticket.models.TicketModel;
 import dev.cruzs.gustavo.FlashSale.ticket.services.TicketService;
@@ -37,7 +38,7 @@ public class OrderService {
   }
 
   @Transactional
-  public void sell(OrderSellDto orderSellDto) {
+  public QrCodeDto sell(OrderSellDto orderSellDto) {
     TicketModel ticketModel = ticketService.findByIdOrTicketNotFoundException(orderSellDto.ticketId());
     ticketService.sell(orderSellDto.ticketId(), orderSellDto.cpfHolder());
 
@@ -47,7 +48,7 @@ public class OrderService {
         ticketModel.getPrice()
     );
 
-    paymentService.processPayment(
+    QrCodeDto qrCodeDto = paymentService.processPayment(
         new ProcessPaymentDto(
             orderSellDto.paymentType(),
             orderModel.getId().toString(),
@@ -61,6 +62,7 @@ public class OrderService {
     );
 
     orderJpaRepository.save(orderModel);
+    return qrCodeDto;
   }
 
   @Transactional
@@ -74,11 +76,20 @@ public class OrderService {
 //    Add call to the notification system
   }
 
+  public void cancelled(UUID id) {
+    OrderModel orderModel = findByIdOrOrderNotFoundException(id);
+
+    ticketService.refund(orderModel.getTicketId());
+    orderModel.changeStatus(OrderStatusEnum.CANCELLED);
+    orderJpaRepository.save(orderModel);
+
+//    Add call to the notification system
+  }
+
   public void refund(UUID id) {
     OrderModel orderModel = findByIdOrOrderNotFoundException(id);
 
     ticketService.refund(orderModel.getTicketId());
-
     orderModel.changeStatus(OrderStatusEnum.REFUND);
     orderJpaRepository.save(orderModel);
 
