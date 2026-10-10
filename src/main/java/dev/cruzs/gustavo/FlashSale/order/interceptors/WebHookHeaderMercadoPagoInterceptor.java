@@ -16,14 +16,23 @@ public class WebHookHeaderMercadoPagoInterceptor implements HandlerInterceptor {
 
   @Value("${payment.mercado_pago.secret_signature}")
   private String secretSignature;
+  @Value("${spring.profiles.active:prod}")
+  private String activeProfile;
 
   @Override
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    String dataId = request.getParameter("data.id");
+
+    if ("dev".equals(activeProfile) && dataId != null && dataId.startsWith("ORD")) {
+      logger.info("Bypass in development mode in webhook header of Mercado Pago");
+      return true;
+    }
+
     try {
       WebhookSignatureValidator.validate(
           request.getHeader("x-signature"),
           request.getHeader("x-request-id"),
-          request.getParameter("data.id"),
+          dataId,
           secretSignature
       );
 
