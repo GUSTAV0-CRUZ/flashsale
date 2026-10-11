@@ -1,6 +1,6 @@
 package dev.cruzs.gustavo.FlashSale.order.adapters;
 
-import dev.cruzs.gustavo.FlashSale.order.gateways.OrderWebHookService;
+import dev.cruzs.gustavo.FlashSale.order.gateways.OrderWebHookGateway;
 import dev.cruzs.gustavo.FlashSale.order.services.OrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,11 +11,11 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 @Service
-public class OrderWebHookServiceAdapter implements OrderWebHookService {
-  private final Logger logger = LoggerFactory.getLogger(OrderWebHookServiceAdapter.class);
+public class OrderWebHookGatewayAdapter implements OrderWebHookGateway {
+  private final Logger logger = LoggerFactory.getLogger(OrderWebHookGatewayAdapter.class);
   private final OrderService orderService;
 
-  public OrderWebHookServiceAdapter(OrderService orderService) {
+  public OrderWebHookGatewayAdapter(OrderService orderService) {
     this.orderService = orderService;
   }
 
@@ -38,11 +38,10 @@ public class OrderWebHookServiceAdapter implements OrderWebHookService {
      Consumer<UUID> command = actionMap.get(action);
 
      if (command == null) {
-       logger.warn("Order with id: {} and action: {} not collected", idOrder, action);
+       logger.warn("Order with id={} and action={} not collected.", idOrder, action);
        return;
      }
 
      command.accept(idOrder);
-     logger.info("Order with id: {} and action: {} collected", idOrder, action);
   }
 }

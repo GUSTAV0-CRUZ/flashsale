@@ -1,6 +1,6 @@
 package dev.cruzs.gustavo.FlashSale.order.controllers;
 
-import dev.cruzs.gustavo.FlashSale.order.gateways.OrderWebHookService;
+import dev.cruzs.gustavo.FlashSale.order.gateways.OrderWebHookGateway;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,15 +12,15 @@ import java.util.Map;
 @RestController
 @RequestMapping(value = "/order/webHook")
 public class OrderWebHookController {
-  private final OrderWebHookService orderWebHookService;
+  private final OrderWebHookGateway orderWebHookGateway;
 
-  public OrderWebHookController(OrderWebHookService orderWebHookService) {
-    this.orderWebHookService = orderWebHookService;
+  public OrderWebHookController(OrderWebHookGateway orderWebHookGateway) {
+    this.orderWebHookGateway = orderWebHookGateway;
   }
 
   @PostMapping(value = "/payment")
   public ResponseEntity<Void> orderPayment(@RequestBody Map<String, Object> requestBody) {
-    orderWebHookService.orderPayment(requestBody);
+    orderWebHookGateway.orderPayment(requestBody);
     return ResponseEntity.ok().build();
   }
 }

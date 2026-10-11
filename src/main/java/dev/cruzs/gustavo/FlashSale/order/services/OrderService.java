@@ -67,7 +67,7 @@ public class OrderService {
 
     orderJpaRepository.save(orderModel);
 
-    logger.info("Order with id: {} is pending", orderModel.getId());
+    logger.info("Create order with id={} and status={}.", orderModel.getId(), orderModel.getStatus().getValue());
     return qrCodeDto;
   }
 
@@ -80,7 +80,7 @@ public class OrderService {
     orderJpaRepository.save(orderModel);
 
 //    Add call to the notification system
-    logger.info("Order with id: {} is confirmed", id);
+    logger.info("Update order with id={}. status={}.", id, orderModel.getStatus().getValue());
   }
 
   public void cancelled(UUID id) {
@@ -91,7 +91,7 @@ public class OrderService {
     orderJpaRepository.save(orderModel);
 
 //    Add call to the notification system
-    logger.info("Order with id: {} is cancelled", id);
+    logger.info("Update order with id={}. status={}.", id, orderModel.getStatus().getValue());
   }
 
   public void actionRequired(UUID id) {
@@ -108,6 +108,6 @@ public class OrderService {
 
 //    Add call to the payment system
 //    Add call to the notification system
-    logger.info("Order with id: {} is refund", id);
+    logger.info("Update order with id={}. status={}", id, orderModel.getStatus().getValue());
   }
 }
