@@ -26,9 +26,9 @@ public class TicketService {
     );
   }
 
-  public void sell(UUID id, String cpfHolder) {
+  public void sell(UUID id) {
     var ticketModel = findByIdOrTicketNotFoundException(id);
-    ticketModel.sell(cpfHolder);
+    ticketModel.sell();
 
     ticketJpaRepository.save(ticketModel);
   }

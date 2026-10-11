@@ -7,7 +7,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.hibernate.validator.constraints.br.CPF;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -23,10 +22,6 @@ public class TicketModel {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
-
-  @CPF(message = "CPF invalid")
-  @Column(name = "cpf_holder")
-  private String cpfHolder;
 
   @Column(nullable = false)
   private String name;
@@ -58,10 +53,9 @@ public class TicketModel {
   @Column(name = "updated_at", nullable = false)
   private Instant updatedAt;
 
-  public void sell(String cpfHolder) {
+  public void sell() {
     if (status != TicketStatusEnum.AVAILABLE) throw new IllegalArgumentException("Status must not be AVAILABLE.");
 
-    this.cpfHolder = cpfHolder;
     status = TicketStatusEnum.PENDING;
   }
 
@@ -74,7 +68,6 @@ public class TicketModel {
   public void cancelSale() {
     if (status != TicketStatusEnum.PENDING) throw new IllegalArgumentException("Status must not be PENDING.");
 
-    cpfHolder = null;
     status = TicketStatusEnum.AVAILABLE;
   }
 
@@ -95,7 +88,6 @@ public class TicketModel {
     )
       throw new IllegalArgumentException("Deadline 48 hours expired.");
 
-    cpfHolder = null;
     status = TicketStatusEnum.AVAILABLE;
   }
 }

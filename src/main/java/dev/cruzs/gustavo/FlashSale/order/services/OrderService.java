@@ -43,7 +43,7 @@ public class OrderService {
   @Transactional
   public QrCodeDto sell(OrderSellDto orderSellDto) {
     TicketModel ticketModel = ticketService.findByIdOrTicketNotFoundException(orderSellDto.ticketId());
-    ticketService.sell(orderSellDto.ticketId(), orderSellDto.cpfHolder());
+    ticketService.sell(orderSellDto.ticketId());
 
     OrderModel orderModel = OrderModel.create(
         orderSellDto.ticketId(),
