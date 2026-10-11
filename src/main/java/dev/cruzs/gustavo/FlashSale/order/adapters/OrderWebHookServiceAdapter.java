@@ -43,6 +43,6 @@ public class OrderWebHookServiceAdapter implements OrderWebHookService {
      }
 
      command.accept(idOrder);
-     logger.warn("Order with id: {} and action: {} collected", idOrder, action);
+     logger.info("Order with id: {} and action: {} collected", idOrder, action);
   }
 }

@@ -2,6 +2,7 @@ package dev.cruzs.gustavo.FlashSale.order.models;
 
 import dev.cruzs.gustavo.FlashSale.order.enums.OrderStatusEnum;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Email;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -32,6 +33,10 @@ public class OrderModel {
   @Column(name = "cpf_holder",  nullable = false)
   private String cpfHolder;
 
+  @Email(message = "Email invalid")
+  @Column(name = "email_holder", nullable = false)
+  private String emailHolder;
+
   @Column(name = "ticket_value",  nullable = false)
   private BigDecimal ticketValue;
 
@@ -47,7 +52,7 @@ public class OrderModel {
   @Column(nullable = false)
   private Instant updatedAt;
 
-  public static OrderModel create(UUID ticketId, String cpfHolder, BigDecimal ticketValue) {
+  public static OrderModel create(UUID ticketId, String cpfHolder, String emailHolder, BigDecimal ticketValue) {
     Instant now = Instant.now();
 
     return new OrderModel(
@@ -55,6 +60,7 @@ public class OrderModel {
         ticketId,
         generateIdempotencyKey(ticketId, cpfHolder, now),
         cpfHolder,
+        emailHolder,
         ticketValue,
         OrderStatusEnum.PENDING,
         now,

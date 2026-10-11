@@ -48,6 +48,7 @@ public class OrderService {
     OrderModel orderModel = OrderModel.create(
         orderSellDto.ticketId(),
         orderSellDto.cpfHolder(),
+        orderSellDto.email(),
         ticketModel.getPrice()
     );
 
