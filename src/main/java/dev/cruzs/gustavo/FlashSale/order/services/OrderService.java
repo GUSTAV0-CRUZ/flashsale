@@ -1,5 +1,6 @@
 package dev.cruzs.gustavo.FlashSale.order.services;
 
+import dev.cruzs.gustavo.FlashSale.notification.services.NotificationService;
 import dev.cruzs.gustavo.FlashSale.order.dtos.OrderSellDto;
 import dev.cruzs.gustavo.FlashSale.order.enums.OrderStatusEnum;
 import dev.cruzs.gustavo.FlashSale.order.exceptions.OrderNotFoundException;
@@ -23,15 +24,18 @@ public class OrderService {
   private final OrderJpaRepository orderJpaRepository;
   private final TicketService ticketService;
   private final PaymentService paymentService;
+  private final NotificationService notificationService;
 
   public OrderService(
       OrderJpaRepository orderJpaRepository,
       TicketService ticketService,
-      PaymentService paymentService
+      PaymentService paymentService,
+      NotificationService notificationService
   ) {
     this.orderJpaRepository = orderJpaRepository;
     this.ticketService = ticketService;
     this.paymentService = paymentService;
+    this.notificationService = notificationService;
   }
 
   public OrderModel findByIdOrOrderNotFoundException(UUID id) {
@@ -79,7 +83,11 @@ public class OrderService {
     ticketService.confirmSale(orderModel.getTicketId());
     orderJpaRepository.save(orderModel);
 
-//    Add call to the notification system
+    notificationService.sendToEmail(
+        "Confirm sell",
+        "Sold Ticket with id of order=" + orderModel.getTicketId() + " has been confirmed",
+        orderModel.getEmailHolder()
+    );
     logger.info("Update order with id={}. status={}.", id, orderModel.getStatus().getValue());
   }
 
@@ -90,12 +98,25 @@ public class OrderService {
     orderModel.changeStatus(OrderStatusEnum.CANCELLED);
     orderJpaRepository.save(orderModel);
 
-//    Add call to the notification system
+    notificationService.sendToEmail(
+        "Cancel sell",
+        "Cancel sell of Ticket with id=" +
+            orderModel.getTicketId() +
+            "and with id of order=" +
+            orderModel.getId(),
+        orderModel.getEmailHolder()
+    );
     logger.info("Update order with id={}. status={}.", id, orderModel.getStatus().getValue());
   }
 
   public void actionRequired(UUID id) {
-//    Add call to the notification system
+    OrderModel orderModel = findByIdOrOrderNotFoundException(id);
+
+    notificationService.sendToEmail(
+        "Required action",
+        "Sell of Ticket pending, with id of order=" + orderModel.getId(),
+        orderModel.getEmailHolder()
+    );
     logger.info("Order with id: {} is required action", id);
   }
 
@@ -107,7 +128,6 @@ public class OrderService {
     orderJpaRepository.save(orderModel);
 
 //    Add call to the payment system
-//    Add call to the notification system
     logger.info("Update order with id={}. status={}", id, orderModel.getStatus().getValue());
   }
 }
