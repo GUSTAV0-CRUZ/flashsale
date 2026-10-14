@@ -57,7 +57,7 @@ public class NotificationModel {
         Instant.now()
     );
   }
-  
+
   public void changeStatus(NotificationStatusEnum status) {
     if (this.status == status) throw new IllegalArgumentException("Status already updated.");
     if (status == null) throw new IllegalArgumentException("Status cannot be null.");
