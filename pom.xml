@@ -51,11 +51,16 @@
 			<artifactId>sdk-java</artifactId>
 			<version>3.7.0</version>
 		</dependency>
-		<!-- Correção para a vulnerabilidade transitiva CVE-2025-48734 -->
+		<!-- Fix for the transitive vulnerability CVE-2025-48734 -->
 		<dependency>
 			<groupId>commons-beanutils</groupId>
 			<artifactId>commons-beanutils</artifactId>
 			<version>1.11.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.mailtrap</groupId>
+			<artifactId>mailtrap-java</artifactId>
+			<version>1.1.0</version>
 		</dependency>
 
 		<dependency>

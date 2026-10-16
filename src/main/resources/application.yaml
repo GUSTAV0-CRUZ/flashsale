@@ -21,3 +21,8 @@ payment:
   mercado_pago:
     access_token: ${MERCADO_PAGO_ACCESS_TOKEN}
     secret_signature: ${MERCADO_PAGO_SECRET_SIGNATURE}
+
+notification:
+  mailtrap:
+    sender_email: ${MAILTRAP_SENDER_EMAIL:hello@demomailtrap.co}
+    token: ${MAILTRAP_TOKEN}
