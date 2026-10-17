@@ -1,0 +1,185 @@
+openapi: 3.0.3
+info:
+  title: FlashSale API
+  description: API for managing tickets and orders in the FlashSale system.
+  version: 1.0.0
+servers:
+  - url: http://localhost:8080
+    description: Local Server
+tags:
+  - name: Tickets
+    description: Ticket related operations
+  - name: Orders
+    description: Purchase and refund operations
+
+paths:
+  /tickets:
+    get:
+      tags:
+        - Tickets
+      summary: Retrieve all tickets
+      operationId: findAllTickets
+      responses:
+        '200':
+          description: A list of tickets returned successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TicketModel'
+
+  /tickets/{id}:
+    get:
+      tags:
+        - Tickets
+      summary: Find a ticket by its ID
+      operationId: findTicketById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Ticket found successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketModel'
+        '404':
+          description: Ticket not found
+
+  /tickets/{id}/buy:
+    post:
+      tags:
+        - Orders
+      summary: Process a ticket purchase
+      operationId: sellTicket
+      parameters:
+        - name: id
+          in: path
+          description: ID of the ticket to be purchased
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SellRequestDto'
+      responses:
+        '200':
+          description: Purchase initiated successfully, returns payment QR Code
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QrCodeDto'
+        '400':
+          description: Validation error or ticket not available
+
+  /tickets/{orderId}/refund:
+    patch:
+      tags:
+        - Orders
+      summary: Request a refund for an order/ticket
+      operationId: refundOrder
+      parameters:
+        - name: orderId
+          in: path
+          description: ID of the order/ticket to be refunded
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Refund processed successfully (No Content)
+        '400':
+          description: Refund deadline rules violated or invalid status
+
+components:
+  schemas:
+    TicketModel:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: "Rock Concert"
+        date:
+          type: string
+          format: date-time
+          example: "2026-12-31T20:00:00Z"
+        location:
+          type: string
+          example: "National Stadium"
+        sector:
+          type: string
+          example: "Premium Area"
+        type:
+          type: string
+          example: "Full"
+        price:
+          type: number
+          format: double
+          example: 150.00
+        status:
+          $ref: '#/components/schemas/TicketStatusEnum'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+    SellRequestDto:
+      type: object
+      required:
+        - cpfHolder
+        - email
+      properties:
+        cpfHolder:
+          type: string
+          example: "123.456.789-00"
+        paymentType:
+          type: string
+          example: "PIX"
+        email:
+          type: string
+          format: email
+          example: "buyer@email.com"
+        token:
+          type: string
+          description: "Payment token (if applicable)"
+        paymentMethodId:
+          type: string
+          example: "pix_01"
+        installment:
+          type: integer
+          example: 1
+
+    QrCodeDto:
+      type: object
+      properties:
+        value:
+          type: string
+          description: PIX Copy and Paste code
+          example: "00020126580014br.gov.bcb.pix..."
+        base64:
+          type: string
+          description: QR Code image in base64 format
+          example: "iVBORw0KGgoAAAANSUhEUgAA..."
+
+    TicketStatusEnum:
+      type: string
+      enum:
+        - AVAILABLE
+        - PENDING
+        - SOLD

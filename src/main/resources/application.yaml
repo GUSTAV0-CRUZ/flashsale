@@ -26,3 +26,8 @@ notification:
   mailtrap:
     sender_email: ${MAILTRAP_SENDER_EMAIL:hello@demomailtrap.co}
     token: ${MAILTRAP_TOKEN}
+
+springdoc:
+  paths-to-exclude: /order/webHook/**
+  swagger-ui:
+    url: /openapi.yaml
