@@ -54,25 +54,25 @@ public class TicketModel {
   private Instant updatedAt;
 
   public void sell() {
-    if (status != TicketStatusEnum.AVAILABLE) throw new IllegalArgumentException("Status must not be AVAILABLE.");
+    if (status != TicketStatusEnum.AVAILABLE) throw new IllegalArgumentException("Status must be AVAILABLE.");
 
     status = TicketStatusEnum.PENDING;
   }
 
   public void confirmSale() {
-    if (status != TicketStatusEnum.PENDING) throw new IllegalArgumentException("Status must not be PENDING.");
+    if (status != TicketStatusEnum.PENDING) throw new IllegalArgumentException("Status must be PENDING.");
 
     status = TicketStatusEnum.SOLD;
   }
 
   public void cancelSale() {
-    if (status != TicketStatusEnum.PENDING) throw new IllegalArgumentException("Status must not be PENDING.");
+    if (status != TicketStatusEnum.PENDING) throw new IllegalArgumentException("Status must be PENDING.");
 
     status = TicketStatusEnum.AVAILABLE;
   }
 
   public void refund() {
-    if (status != TicketStatusEnum.SOLD) throw new IllegalArgumentException("Status must not be SOLD.");
+    if (status != TicketStatusEnum.SOLD) throw new IllegalArgumentException("Status must be SOLD.");
 
     Instant now = Instant.now();
 
@@ -82,10 +82,7 @@ public class TicketModel {
     if (now.isAfter(updatedAt.plus(Duration.ofDays(7))))
       throw new IllegalArgumentException("Deadline 7 day expired.");
 
-    if (
-        now.isAfter(date.minus(Duration.ofDays(7))) &&
-        now.isAfter(updatedAt.plus(Duration.ofHours(48)))
-    )
+    if (createdAt.isAfter(date.minus(Duration.ofHours(48))))
       throw new IllegalArgumentException("Deadline 48 hours expired.");
 
     status = TicketStatusEnum.AVAILABLE;
