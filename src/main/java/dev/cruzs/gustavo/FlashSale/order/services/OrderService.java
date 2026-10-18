@@ -15,23 +15,27 @@ import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
 
 @Service
 public class OrderService {
   private final Logger logger = LoggerFactory.getLogger(OrderService.class);
+  private final TransactionTemplate transactionTemplate;
+
   private final OrderJpaRepository orderJpaRepository;
   private final TicketService ticketService;
   private final PaymentService paymentService;
   private final NotificationService notificationService;
 
   public OrderService(
-      OrderJpaRepository orderJpaRepository,
+      TransactionTemplate transactionTemplate, OrderJpaRepository orderJpaRepository,
       TicketService ticketService,
       PaymentService paymentService,
       NotificationService notificationService
   ) {
+    this.transactionTemplate = transactionTemplate;
     this.orderJpaRepository = orderJpaRepository;
     this.ticketService = ticketService;
     this.paymentService = paymentService;
@@ -44,16 +48,22 @@ public class OrderService {
     );
   }
 
-  @Transactional
   public QrCodeDto sell(OrderSellDto orderSellDto) {
     TicketModel ticketModel = ticketService.findByIdOrTicketNotFoundException(orderSellDto.ticketId());
-    ticketService.sell(orderSellDto.ticketId());
-
     OrderModel orderModel = OrderModel.create(
         orderSellDto.ticketId(),
         orderSellDto.cpfHolder(),
         orderSellDto.email(),
         ticketModel.getPrice()
+    );
+
+    transactionTemplate.execute(
+        status -> {
+          ticketService.sell(orderSellDto.ticketId());
+          orderJpaRepository.save(orderModel);
+
+          return null;
+        }
     );
 
     QrCodeDto qrCodeDto = paymentService.processPayment(
@@ -69,19 +79,22 @@ public class OrderService {
         )
     );
 
-    orderJpaRepository.save(orderModel);
-
     logger.info("Create order with id={} and status={}.", orderModel.getId(), orderModel.getStatus().getValue());
     return qrCodeDto;
   }
 
-  @Transactional
   public void confirmSale(UUID id) {
     OrderModel orderModel = findByIdOrOrderNotFoundException(id);
 
     orderModel.changeStatus(OrderStatusEnum.CONFIRMED);
-    ticketService.confirmSale(orderModel.getTicketId());
-    orderJpaRepository.save(orderModel);
+    transactionTemplate.execute(
+        status -> {
+          ticketService.confirmSale(orderModel.getTicketId());
+          orderJpaRepository.save(orderModel);
+
+          return null;
+        }
+    );
 
     notificationService.sendToEmail(
         "Confirm sell",
@@ -94,9 +107,15 @@ public class OrderService {
   public void cancelled(UUID id) {
     OrderModel orderModel = findByIdOrOrderNotFoundException(id);
 
-    ticketService.cancelSale(orderModel.getTicketId());
-    orderModel.changeStatus(OrderStatusEnum.CANCELLED);
-    orderJpaRepository.save(orderModel);
+    transactionTemplate.execute(
+        status -> {
+          ticketService.cancelSale(orderModel.getTicketId());
+          orderModel.changeStatus(OrderStatusEnum.CANCELLED);
+          orderJpaRepository.save(orderModel);
+
+          return null;
+        }
+    );
 
     notificationService.sendToEmail(
         "Cancel sell",
@@ -123,9 +142,15 @@ public class OrderService {
   public void refund(UUID id) {
     OrderModel orderModel = findByIdOrOrderNotFoundException(id);
 
-    ticketService.refund(orderModel.getTicketId());
-    orderModel.changeStatus(OrderStatusEnum.REFUND);
-    orderJpaRepository.save(orderModel);
+    transactionTemplate.execute(
+        status -> {
+          ticketService.refund(orderModel.getTicketId());
+          orderModel.changeStatus(OrderStatusEnum.REFUND);
+          orderJpaRepository.save(orderModel);
+
+          return null;
+        }
+    );
 
 //    Add call to the payment system
     logger.info("Update order with id={}. status={}", id, orderModel.getStatus().getValue());

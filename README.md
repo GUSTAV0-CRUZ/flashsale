@@ -49,15 +49,13 @@ Aplicação foi construída intencionalmente como um monolito para estabelecer u
 - **Fluxo:** a transação é vinculada ao CPF informado. Após a confirmação, a entrada no evento é validada pelo CPF associado ao pedido.
 - **Justificativa:** simplificar o funil de conversão e reduzir etapas no processo de compra, especialmente em cenários de *compras rápidas*.
 
-### 5. Controle Transacional Estratégico (`@Transactional`)
+### 5. Controle Transacional Programático (`TransactionTemplate`)
 
-- **Decisão:** utilização estratégica de `@Transactional` na camada `OrderService`, por exemplo, nos métodos `sell` e `confirmSale`.
-
+- **Decisão:** substituição do `@Transactional` declarativo pelo uso do `TransactionTemplate` na camada de `OrderService` para demarcar limites transacionais de forma cirúrgica.
+- **Justificativa:** em cenários de alta concorrência, manter uma transação de banco de dados aberta enquanto o sistema aguarda o retorno de APIs externas (Mercado Pago ou Mailtrap) leva rapidamente ao esgotamento do *Connection Pool*. Isolando apenas as operações de banco (`orderJpaRepository` e `ticketService`) dentro do `TransactionTemplate`, a conexão é liberada em milissegundos, realizando o I/O de rede com o banco livre.
 - **Justificativa — trade-offs conscientes:**
-    - No método `sell`, a transação engloba a integração com o Mercado Pago. A intenção é reverter a criação do pedido caso a API de pagamento retorne um erro síncrono.
-    - Nos métodos de `Order`, a transação foi estendida ao envio de e-mails. Pois o email não pode ser perdido, porque é a única forma do cliente receber o ingresso.
-
-> **Nota arquitetural:** manter uma transação de banco de dados aberta durante uma chamada HTTP externa pode aumentar a contenção e não garante atomicidade entre os dois sistemas.
+  - Ao tirar o serviço de e-mail de dentro da transação, assume-se o risco de o banco commitar a confirmação da venda e o e-mail falhar na sequência.
+  - O modelo mental adotado prioriza a **ação do cliente e o negócio**: garantir o processamento do pagamento e a reserva do ingresso no banco é mais crítico do que garantir a entrega da notificação. Tratativas de retentativa de e-mails falhos poderão ser implementadas em evoluções futuras da arquitetura.
 
 ---
 

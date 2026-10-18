@@ -30,6 +30,7 @@ public class OrderWebHookGatewayAdapter implements OrderWebHookGateway {
   private void processOrder(String action, UUID idOrder) {
      Map<String, Consumer<UUID>> actionMap = Map.of(
         "order.processed", orderService::confirmSale,
+        "order.failed", orderService::cancelled,
         "order.canceled", orderService::cancelled,
         "order.action_required", orderService::actionRequired
      );
