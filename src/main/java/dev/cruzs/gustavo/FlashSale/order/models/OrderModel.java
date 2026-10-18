@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.validator.constraints.br.CPF;
 
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -30,6 +31,7 @@ public class OrderModel {
   @Column(name = "idempotency_key",  nullable = false)
   private String idempotencyKey;
 
+  @CPF
   @Column(name = "cpf_holder",  nullable = false)
   private String cpfHolder;
 
@@ -76,9 +78,9 @@ public class OrderModel {
   }
 
   public void changeStatus(OrderStatusEnum status) {
-    if (status == null) throw new NullPointerException("Status cannot be null.");
+    if (status == null) throw new IllegalArgumentException("Status cannot be null.");
     if (status == OrderStatusEnum.PENDING)
-      throw new IllegalArgumentException("Status is already PENDING.");
+      throw new IllegalArgumentException("Status cannot be PENDING.");
     if (this.status != OrderStatusEnum.PENDING)
       throw new IllegalArgumentException("Status is already different from PENDING.");
 
