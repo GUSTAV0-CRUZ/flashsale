@@ -27,6 +27,7 @@ public class NotificationService {
 
   public void sendToEmail(String title, String message, String email) {
     NotificationModel notificationModel = NotificationModel.create(title, message, email);
+    notificationRepository.save(notificationModel);
 
     logger.info("Try send notification to email={}, timestamp={}", email, notificationModel.getCreatedAt());
     try {

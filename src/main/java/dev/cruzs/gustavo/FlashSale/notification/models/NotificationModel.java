@@ -1,6 +1,7 @@
 package dev.cruzs.gustavo.FlashSale.notification.models;
 
 import dev.cruzs.gustavo.FlashSale.notification.enums.NotificationStatusEnum;
+import dev.cruzs.gustavo.FlashSale.order.enums.OrderStatusEnum;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
@@ -59,8 +60,11 @@ public class NotificationModel {
   }
 
   public void changeStatus(NotificationStatusEnum status) {
-    if (this.status == status) throw new IllegalArgumentException("Status already updated.");
     if (status == null) throw new IllegalArgumentException("Status cannot be null.");
+    if (status == NotificationStatusEnum.PENDING)
+      throw new IllegalArgumentException("Status cannot be PENDING.");
+    if (this.status != NotificationStatusEnum.PENDING)
+      throw new IllegalArgumentException("Status is already different from PENDING.");
 
     this.status = status;
   }
