@@ -11,7 +11,6 @@ import dev.cruzs.gustavo.FlashSale.payment.dtos.QrCodeDto;
 import dev.cruzs.gustavo.FlashSale.payment.services.PaymentService;
 import dev.cruzs.gustavo.FlashSale.ticket.models.TicketModel;
 import dev.cruzs.gustavo.FlashSale.ticket.services.TicketService;
-import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;

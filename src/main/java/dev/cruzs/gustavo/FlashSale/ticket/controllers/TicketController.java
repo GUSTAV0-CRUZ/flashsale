@@ -22,7 +22,7 @@ public class TicketController {
 
   @GetMapping
   public ResponseEntity<List<TicketModel>> ticketModel() {
-    return ResponseEntity.ok(ticketService.findAll());
+    return ResponseEntity.ok(ticketService.findAllRandomLimitFivePerStatus());
   }
 
   @GetMapping("/{id}")

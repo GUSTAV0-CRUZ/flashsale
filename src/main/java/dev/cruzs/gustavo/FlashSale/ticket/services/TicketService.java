@@ -1,12 +1,15 @@
 package dev.cruzs.gustavo.FlashSale.ticket.services;
 
+import dev.cruzs.gustavo.FlashSale.ticket.enums.TicketStatusEnum;
 import dev.cruzs.gustavo.FlashSale.ticket.exceptions.TicketNotFoundException;
 import dev.cruzs.gustavo.FlashSale.ticket.models.TicketModel;
 import dev.cruzs.gustavo.FlashSale.ticket.repositories.TicketJpaRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -19,10 +22,17 @@ public class TicketService {
     this.ticketJpaRepository = ticketJpaRepository;
   }
 
-  public List<TicketModel> findAll() {
+  public List<TicketModel> findAllRandomLimitFivePerStatus() {
     logger.info("Find all tickets");
 
-    return this.ticketJpaRepository.findAll();
+    List<UUID> ids = ticketJpaRepository.findIdsByStatus(TicketStatusEnum.AVAILABLE);
+
+    if (ids.isEmpty()) return Collections.emptyList();
+
+    Collections.shuffle(ids);
+    List<UUID> randomIds = ids.stream().limit(5).toList();
+
+    return ticketJpaRepository.findByIdIn(randomIds);
   }
 
   public TicketModel findByIdOrTicketNotFoundException(UUID id) {
@@ -33,6 +43,7 @@ public class TicketService {
     );
   }
 
+  @CacheEvict(value = "ticketIds", allEntries = true)
   public void sell(UUID id) {
     var ticketModel = findByIdOrTicketNotFoundException(id);
     ticketModel.sell();
@@ -42,6 +53,7 @@ public class TicketService {
     logger.info("Ticket with id={} will be sold, status={}.", id, ticketModel.getStatus());
   }
 
+  @CacheEvict(value = "ticketIds", allEntries = true)
   public TicketModel confirmSale(UUID id) {
     var ticketModel = findByIdOrTicketNotFoundException(id);
 
@@ -53,6 +65,7 @@ public class TicketService {
     return ticketModel;
   }
 
+  @CacheEvict(value = "ticketIds", allEntries = true)
   public TicketModel cancelSale(UUID id) {
     var ticketModel = findByIdOrTicketNotFoundException(id);
 
@@ -63,6 +76,7 @@ public class TicketService {
     return ticketJpaRepository.save(ticketModel);
   }
 
+  @CacheEvict(value = "ticketIds", allEntries = true)
   public void refund(UUID id) {
     var ticketModel = findByIdOrTicketNotFoundException(id);
 

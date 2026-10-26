@@ -1,4 +1,12 @@
 spring:
+  threads:
+    virtual:
+      enabled: true
+  cache:
+    caffeine:
+      spec:
+        maximumSize: 1000
+        expireAfterWrite: 1d
   profiles:
     active: dev
   application:

@@ -143,9 +143,38 @@ A documentação detalhada dos contratos está disponível no Swagger.
 
 Esta seção documentará os resultados dos testes de estresse, os gargalos identificados e as refatorações realizadas para melhorar a consistência e o desempenho.
 
----
+### Decisões Arquiteturais (Otimização de Leitura)
 
-## 👨‍💻 Autor
+- **Filtro e Limitação:** Restrição da busca para exibir apenas 5 ingressos disponíveis de forma aleatoria por vez, reduzindo o payload na rede e mitigando o risco de colisão (vários usuários tentando comprar o mesmo ingresso).
+- **Responsabilidade (Aleatoriedade na Aplicação):** Pega os IDs com status `AVAILABLE` e armazena em cache, aleatorizando com o Java para buscar apenas 5 registros aleatórios, aliviando operações do banco.
+- **Cache Local (Caffeine):** Armazenamento em memória da lista de UUIDs de ingressos disponíveis, com invalidação automática (`@CacheEvict`) acionada a cada evento de escrita de um ticket.
+- **Virtual Threads (Java 21):** Ativação no Spring Boot para gerenciar o alto enfileiramento de usuários sem esgotar o pool de conexões do servidor web.
+
+### Comparativo de Carga (Teste de 5.000 VUs)
+
+**Cenário Inicial (1.000 registros diretos do banco sem otimização):**
+- **Rendimento (RPS):** ~398 requisições por segundo.
+- **Latência p(95):** 15.64 segundos.
+- **Impacto:** 10 GB de transferência de rede e saturação severa de CPU na serialização.
+
+<details>
+  <summary>Ver print do teste inicial</summary>
+
+![Teste Inicial](docs/evidences/reading_optimization_initial_test.png)
+</details>
+
+**Cenário Atual (Busca 5 registros com os ids em memória no Caffeine Cache):**
+- **Rendimento (RPS):** 1.888 requisições por segundo (aumento superior a 350%).
+- **Latência p(95):** 4.44 segundos (redução de 71% no tempo de espera).
+- **Impacto:** Banco de dados totalmente poupado (CPU em ~0.52%) e estabilidade absoluta com 0.00% de erros.
+
+<details>
+  <summary>Ver print do teste final</summary>
+
+![Teste Atual](docs/evidences/reading_optimization_final_test.png)
+</details>
+
+👨‍💻 Autor
 
 ## 👨‍💻 Autor
 

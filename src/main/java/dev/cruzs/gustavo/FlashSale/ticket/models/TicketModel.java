@@ -17,7 +17,12 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@Table(name = "tb_ticket")
+@Table(
+    name = "tb_ticket",
+    indexes = {
+      @Index(name = "idx_ticket_status", columnList = "status")
+    }
+)
 public class TicketModel {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
