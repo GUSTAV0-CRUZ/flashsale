@@ -3,6 +3,7 @@ package dev.cruzs.gustavo.FlashSale.exceptions;
 import dev.cruzs.gustavo.FlashSale.exceptions.dtos.ExceptionsResponseDto;
 import dev.cruzs.gustavo.FlashSale.order.exceptions.OrderNotFoundException;
 import dev.cruzs.gustavo.FlashSale.payment.exceptions.MercadoPagoException;
+import dev.cruzs.gustavo.FlashSale.ticket.exceptions.TicketAlreadySoldException;
 import dev.cruzs.gustavo.FlashSale.ticket.exceptions.TicketNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -56,6 +57,17 @@ public class ExceptionsHandler {
 
     loggerError(error);
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
+  }
+
+  @ExceptionHandler(TicketAlreadySoldException.class)
+  public ResponseEntity<ExceptionsResponseDto> ticketAlreadySoldException(
+      TicketAlreadySoldException e,
+      HttpServletRequest request
+  ) {
+    var error = new ExceptionsResponseDto(400, e.getMessage(), Instant.now(), request.getRequestURI());
+
+    loggerError(error);
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
   }
 
   @ExceptionHandler(OrderNotFoundException.class)

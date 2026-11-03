@@ -1,6 +1,7 @@
 package dev.cruzs.gustavo.FlashSale.ticket.services;
 
 import dev.cruzs.gustavo.FlashSale.ticket.enums.TicketStatusEnum;
+import dev.cruzs.gustavo.FlashSale.ticket.exceptions.TicketAlreadySoldException;
 import dev.cruzs.gustavo.FlashSale.ticket.exceptions.TicketNotFoundException;
 import dev.cruzs.gustavo.FlashSale.ticket.models.TicketModel;
 import dev.cruzs.gustavo.FlashSale.ticket.repositories.TicketJpaRepository;
@@ -36,7 +37,7 @@ public class TicketService {
   }
 
   public TicketModel findByIdOrTicketNotFoundException(UUID id) {
-    logger.info("Searches for a ticket by id={} .", id);
+    logger.info("Find a ticket by id={}", id);
 
     return ticketJpaRepository.findById(id).orElseThrow(
         TicketNotFoundException::new
@@ -48,7 +49,9 @@ public class TicketService {
     var ticketModel = findByIdOrTicketNotFoundException(id);
     ticketModel.sell();
 
-    ticketJpaRepository.save(ticketModel);
+    int rowMo = ticketJpaRepository.sellTicket(ticketModel.getId());
+
+    if  (rowMo == 0) throw new TicketAlreadySoldException();
 
     logger.info("Ticket with id={} will be sold, status={}.", id, ticketModel.getStatus());
   }

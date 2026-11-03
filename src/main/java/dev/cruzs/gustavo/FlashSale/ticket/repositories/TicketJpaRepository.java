@@ -4,6 +4,7 @@ import dev.cruzs.gustavo.FlashSale.ticket.enums.TicketStatusEnum;
 import dev.cruzs.gustavo.FlashSale.ticket.models.TicketModel;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -16,4 +17,12 @@ public interface TicketJpaRepository extends JpaRepository<TicketModel, UUID> {
   List<UUID> findIdsByStatus(@Param("status") TicketStatusEnum status);
 
   List<TicketModel> findByIdIn(List<UUID> ids);
+
+  @Modifying
+  @Query(
+      "UPDATE TicketModel t SET t.status = dev.cruzs.gustavo.FlashSale.ticket.enums.TicketStatusEnum.PENDING " +
+      "WHERE t.id = :id " +
+      "AND t.status = dev.cruzs.gustavo.FlashSale.ticket.enums.TicketStatusEnum.AVAILABLE"
+  )
+  int sellTicket(@Param("id") UUID id);
 }

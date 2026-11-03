@@ -28,7 +28,7 @@ public class OrderModel {
   @Column(name = "ticket_id",  nullable = false)
   private UUID ticketId;
 
-  @Column(name = "idempotency_key",  nullable = false)
+  @Column(name = "idempotency_key", unique = true, nullable = false)
   private String idempotencyKey;
 
   @CPF
