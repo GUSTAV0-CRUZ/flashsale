@@ -27,7 +27,7 @@ class TicketTest {
     TicketStatusEnum status = TicketStatusEnum.AVAILABLE;
     Instant instant = Instant.now();
 
-    ticketModel = new TicketModel(id, name, date, location, sector, type, price, status, instant, instant);
+    ticketModel = new TicketModel(id, 1, name, date, location, sector, type, price, status, instant, instant);
   }
 
   @DisplayName("sellSuccess - Should return ticket with status=PENDING")

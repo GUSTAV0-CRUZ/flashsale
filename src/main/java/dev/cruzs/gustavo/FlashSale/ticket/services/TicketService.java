@@ -1,7 +1,6 @@
 package dev.cruzs.gustavo.FlashSale.ticket.services;
 
 import dev.cruzs.gustavo.FlashSale.ticket.enums.TicketStatusEnum;
-import dev.cruzs.gustavo.FlashSale.ticket.exceptions.TicketAlreadySoldException;
 import dev.cruzs.gustavo.FlashSale.ticket.exceptions.TicketNotFoundException;
 import dev.cruzs.gustavo.FlashSale.ticket.models.TicketModel;
 import dev.cruzs.gustavo.FlashSale.ticket.repositories.TicketJpaRepository;
@@ -47,36 +46,31 @@ public class TicketService {
   @CacheEvict(value = "ticketIds", allEntries = true)
   public void sell(UUID id) {
     var ticketModel = findByIdOrTicketNotFoundException(id);
+
     ticketModel.sell();
-
-    int rowMo = ticketJpaRepository.sellTicket(ticketModel.getId());
-
-    if  (rowMo == 0) throw new TicketAlreadySoldException();
+    ticketJpaRepository.save(ticketModel);
 
     logger.info("Ticket with id={} will be sold, status={}.", id, ticketModel.getStatus());
   }
 
   @CacheEvict(value = "ticketIds", allEntries = true)
-  public TicketModel confirmSale(UUID id) {
+  public void confirmSale(UUID id) {
     var ticketModel = findByIdOrTicketNotFoundException(id);
 
     ticketModel.confirmSale();
     ticketJpaRepository.save(ticketModel);
 
     logger.info("Ticket with id={} has been sold, status={}.", id, ticketModel.getStatus());
-
-    return ticketModel;
   }
 
   @CacheEvict(value = "ticketIds", allEntries = true)
-  public TicketModel cancelSale(UUID id) {
+  public void cancelSale(UUID id) {
     var ticketModel = findByIdOrTicketNotFoundException(id);
 
     ticketModel.cancelSale();
+    ticketJpaRepository.save(ticketModel);
 
     logger.info("Ticket with id={} has been canceled, status={}.", id, ticketModel.getStatus());
-
-    return ticketJpaRepository.save(ticketModel);
   }
 
   @CacheEvict(value = "ticketIds", allEntries = true)
@@ -84,9 +78,8 @@ public class TicketService {
     var ticketModel = findByIdOrTicketNotFoundException(id);
 
     ticketModel.refund();
+    ticketJpaRepository.save(ticketModel);
 
     logger.info("Ticket with id={} has been refunded, status={}.", id, ticketModel.getStatus());
-
-    ticketJpaRepository.save(ticketModel);
   }
 }

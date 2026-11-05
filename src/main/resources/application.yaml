@@ -8,7 +8,8 @@ spring:
         maximumSize: 1000
         expireAfterWrite: 1d
   profiles:
-    active: dev
+#    active: dev
+    active: dev,test
   application:
     name: FlashSale
 
@@ -39,3 +40,7 @@ springdoc:
   paths-to-exclude: /order/webHook/**
   swagger-ui:
     url: /openapi.yaml
+
+logging:
+  level:
+    root: WARN

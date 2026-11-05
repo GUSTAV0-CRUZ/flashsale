@@ -23,7 +23,7 @@ public class WebHookHeaderMercadoPagoInterceptor implements HandlerInterceptor {
   public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
     String dataId = request.getParameter("data.id");
 
-    if (activeProfile.equals("dev") && dataId != null && dataId.startsWith("ORD")) {
+    if (activeProfile.contains("dev") && dataId != null && dataId.startsWith("ORD")) {
       logger.info("Bypass in development mode in webhook header of Mercado Pago");
       return true;
     }

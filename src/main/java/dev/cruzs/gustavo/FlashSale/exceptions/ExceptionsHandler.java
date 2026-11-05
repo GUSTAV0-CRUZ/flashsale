@@ -3,7 +3,6 @@ package dev.cruzs.gustavo.FlashSale.exceptions;
 import dev.cruzs.gustavo.FlashSale.exceptions.dtos.ExceptionsResponseDto;
 import dev.cruzs.gustavo.FlashSale.order.exceptions.OrderNotFoundException;
 import dev.cruzs.gustavo.FlashSale.payment.exceptions.MercadoPagoException;
-import dev.cruzs.gustavo.FlashSale.ticket.exceptions.TicketAlreadySoldException;
 import dev.cruzs.gustavo.FlashSale.ticket.exceptions.TicketNotFoundException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
@@ -11,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -59,15 +59,15 @@ public class ExceptionsHandler {
     return ResponseEntity.status(HttpStatus.NOT_FOUND).body(error);
   }
 
-  @ExceptionHandler(TicketAlreadySoldException.class)
-  public ResponseEntity<ExceptionsResponseDto> ticketAlreadySoldException(
-      TicketAlreadySoldException e,
+  @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+  public ResponseEntity<ExceptionsResponseDto> objectOptimisticLockingFailureException(
+      ObjectOptimisticLockingFailureException e,
       HttpServletRequest request
   ) {
-    var error = new ExceptionsResponseDto(400, e.getMessage(), Instant.now(), request.getRequestURI());
+    var error = new ExceptionsResponseDto(409, e.getMessage(), Instant.now(), request.getRequestURI());
 
     loggerError(error);
-    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
   }
 
   @ExceptionHandler(OrderNotFoundException.class)

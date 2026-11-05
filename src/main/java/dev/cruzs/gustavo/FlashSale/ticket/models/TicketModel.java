@@ -28,6 +28,9 @@ public class TicketModel {
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
 
+  @Version
+  private Integer version;
+
   @Column(nullable = false)
   private String name;
 
