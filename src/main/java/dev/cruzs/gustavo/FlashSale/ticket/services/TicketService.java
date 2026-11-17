@@ -8,33 +8,36 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 public class TicketService {
   private final Logger logger = LoggerFactory.getLogger(TicketService.class);
+
   private final TicketJpaRepository ticketJpaRepository;
+  private final TicketCacheService ticketCacheService;
 
-  public TicketService(TicketJpaRepository ticketJpaRepository) {
+  public TicketService(TicketJpaRepository ticketJpaRepository, TicketCacheService ticketCacheService) {
     this.ticketJpaRepository = ticketJpaRepository;
+    this.ticketCacheService = ticketCacheService;
   }
 
-  public List<TicketModel> findAllRandomLimitFivePerStatus() {
-    logger.info("Find all tickets");
+  public List<TicketModel> findAllRandomLimitFivePerStatusAvailable() {
+    logger.info("Find five tickets per status AVAILABLE");
 
-    List<UUID> ids = ticketJpaRepository.findIdsByStatus(TicketStatusEnum.AVAILABLE);
+    List<TicketModel> ticketsModel = ticketCacheService.getOrLoadFindAllByStatus(TicketStatusEnum.AVAILABLE);
 
-    if (ids.isEmpty()) return Collections.emptyList();
+    if (ticketsModel.isEmpty()) return Collections.emptyList();
 
-    Collections.shuffle(ids);
-    List<UUID> randomIds = ids.stream().limit(5).toList();
+    List<TicketModel> mutableTicketModels = new ArrayList<>(ticketsModel);
+    Collections.shuffle(mutableTicketModels);
 
-    return ticketJpaRepository.findByIdIn(randomIds);
+    return mutableTicketModels.stream().limit(5).toList();
   }
 
+  @Transactional(readOnly = true)
   public TicketModel findByIdOrTicketNotFoundException(UUID id) {
     logger.info("Find a ticket by id={}", id);
 
@@ -43,7 +46,8 @@ public class TicketService {
     );
   }
 
-  @CacheEvict(value = "ticketIds", allEntries = true)
+  @CacheEvict(value = "tickets", key = "'AVAILABLE'")
+  @Transactional
   public void sell(UUID id) {
     var ticketModel = findByIdOrTicketNotFoundException(id);
 
@@ -53,7 +57,7 @@ public class TicketService {
     logger.info("Ticket with id={} will be sold, status={}.", id, ticketModel.getStatus());
   }
 
-  @CacheEvict(value = "ticketIds", allEntries = true)
+  @Transactional
   public void confirmSale(UUID id) {
     var ticketModel = findByIdOrTicketNotFoundException(id);
 
@@ -63,23 +67,27 @@ public class TicketService {
     logger.info("Ticket with id={} has been sold, status={}.", id, ticketModel.getStatus());
   }
 
-  @CacheEvict(value = "ticketIds", allEntries = true)
-  public void cancelSale(UUID id) {
+  @Transactional
+  public TicketModel cancelSale(UUID id) {
     var ticketModel = findByIdOrTicketNotFoundException(id);
 
     ticketModel.cancelSale();
     ticketJpaRepository.save(ticketModel);
 
     logger.info("Ticket with id={} has been canceled, status={}.", id, ticketModel.getStatus());
+
+    return ticketModel;
   }
 
-  @CacheEvict(value = "ticketIds", allEntries = true)
-  public void refund(UUID id) {
+  @Transactional
+  public TicketModel refund(UUID id) {
     var ticketModel = findByIdOrTicketNotFoundException(id);
 
     ticketModel.refund();
     ticketJpaRepository.save(ticketModel);
 
     logger.info("Ticket with id={} has been refunded, status={}.", id, ticketModel.getStatus());
+
+    return ticketModel;
   }
 }

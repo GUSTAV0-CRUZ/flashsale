@@ -14,6 +14,7 @@ import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -46,6 +47,17 @@ public class ExceptionsHandler {
 
     loggerError(error);
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+  }
+
+  @ExceptionHandler(SQLIntegrityConstraintViolationException.class)
+  public ResponseEntity<ExceptionsResponseDto> sQLIntegrityConstraintViolationException(
+      SQLIntegrityConstraintViolationException e,
+      HttpServletRequest request
+  ) {
+    var error = new ExceptionsResponseDto(409, "Order already processed", Instant.now(), request.getRequestURI());
+
+    loggerError(error);
+    return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
   }
 
   @ExceptionHandler(TicketNotFoundException.class)

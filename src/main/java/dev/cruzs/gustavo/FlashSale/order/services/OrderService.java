@@ -2,6 +2,7 @@ package dev.cruzs.gustavo.FlashSale.order.services;
 
 import dev.cruzs.gustavo.FlashSale.notification.services.NotificationService;
 import dev.cruzs.gustavo.FlashSale.order.dtos.OrderSellDto;
+import dev.cruzs.gustavo.FlashSale.order.dtos.OrderSellResponseDto;
 import dev.cruzs.gustavo.FlashSale.order.enums.OrderStatusEnum;
 import dev.cruzs.gustavo.FlashSale.order.exceptions.OrderNotFoundException;
 import dev.cruzs.gustavo.FlashSale.order.models.OrderModel;
@@ -47,7 +48,7 @@ public class OrderService {
     );
   }
 
-  public QrCodeDto sell(OrderSellDto orderSellDto) {
+  public OrderSellResponseDto sell(OrderSellDto orderSellDto) {
     TicketModel ticketModel = ticketService.findByIdOrTicketNotFoundException(orderSellDto.ticketId());
     OrderModel orderModel = OrderModel.create(
         orderSellDto.ticketId(),
@@ -79,7 +80,7 @@ public class OrderService {
     );
 
     logger.info("Create order with id={} and status={}.", orderModel.getId(), orderModel.getStatus().getValue());
-    return qrCodeDto;
+    return new OrderSellResponseDto(orderModel.getId(), qrCodeDto);
   }
 
   public void confirmSale(UUID id) {

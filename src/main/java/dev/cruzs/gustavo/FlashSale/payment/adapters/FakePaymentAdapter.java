@@ -14,24 +14,17 @@ import org.springframework.stereotype.Component;
 @Profile("test")
 @Component
 public class FakePaymentAdapter implements PaymentGateway {
-  private final FakeWebhookPaymentAdapter fakeWebhookPaymentAdapter;
-
-  public FakePaymentAdapter(FakeWebhookPaymentAdapter fakeWebhookPaymentAdapter) {
-    this.fakeWebhookPaymentAdapter = fakeWebhookPaymentAdapter;
-  }
 
   @Lazy
   @Override
   public void processCreditCard(PaymentProcessCreditCartCommand paymentProcessCreditCartCommand) {
     LoadingTimeUtil.load();
-    fakeWebhookPaymentAdapter.sendToWebhook(paymentProcessCreditCartCommand.externalReference());
 }
 
   @Lazy
   @Override
   public QrCodeDto processPix(PaymentProcessPixCommand paymentprocessPixCommand) {
     LoadingTimeUtil.load();
-    fakeWebhookPaymentAdapter.sendToWebhook(paymentprocessPixCommand.externalReference());
     return new QrCodeDto("QRCodeCopyAndPasteString", "UVJDb2RlQ29weUFuZFBhc3RlU3RyaW5n");
   }
 }

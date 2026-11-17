@@ -147,7 +147,7 @@ Esta seção documentará os resultados dos testes de estresse, os gargalos iden
 
 - **Filtro e Limitação:** Restrição da busca para exibir apenas 5 ingressos disponíveis de forma aleatoria por vez, reduzindo o payload na rede e mitigando o risco de colisão (vários usuários tentando comprar o mesmo ingresso).
 - **Responsabilidade (Aleatoriedade na Aplicação):** Pega os IDs com status `AVAILABLE` e armazena em cache, aleatorizando com o Java para buscar apenas 5 registros aleatórios, aliviando operações do banco.
-- **Cache Local (Caffeine):** Armazenamento em memória da lista de UUIDs de ingressos disponíveis, com invalidação automática (`@CacheEvict`) acionada a cada evento de escrita de um ticket.
+- **Cache Local (Caffeine):** A consulta inicial carrega todos os objetos TicketModel disponíveis no cache em memória. O método da aplicação faz o shuffle e a limitação dos 5 registros diretamente em CPU/RAM, poupando chamadas de I/O de rede e queries repetitivas no banco de dados.
 - **Virtual Threads (Java 21):** Ativação no Spring Boot para gerenciar o alto enfileiramento de usuários sem esgotar o pool de conexões do servidor web.
 
 ### Comparativo de Carga (Teste de 5.000 VUs)
@@ -163,10 +163,10 @@ Esta seção documentará os resultados dos testes de estresse, os gargalos iden
 ![Teste Inicial](docs/evidences/reading_optimization_initial_test.png)
 </details>
 
-**Cenário Atual (Busca 5 registros com os ids em memória no Caffeine Cache):**
-- **Rendimento (RPS):** 1.888 requisições por segundo (aumento superior a 350%).
-- **Latência p(95):** 4.44 segundos (redução de 71% no tempo de espera).
-- **Impacto:** Banco de dados totalmente poupado (CPU em ~0.52%) e estabilidade absoluta com 0.00% de erros.
+**Cenário Atual (Lote de 100 registros):**
+- **Rendimento (RPS):** ~20.095 requisições por segundo (aumento superior a 4.900% em relação ao cenário sem otimização).
+- **Latência p(95):** 109.15 milissegundos (mediana de 36.47ms).
+- **Impacto:** Redução drástica do consumo de CPU da aplicação, banco de dados aliviado, 2.6 GB de dados servidos e 0.00% de erros em mais de 1.6 milhão de chamadas.
 
 <details>
   <summary>Ver print do teste final</summary>
